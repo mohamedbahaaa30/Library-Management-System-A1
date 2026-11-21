@@ -10,7 +10,7 @@
         public DateTime? ReturnDate { get; set; }
 
         // Navigation property for the user who borrowed the book copy
-        public int ApplicationUserId { get; set; }
+        public string ApplicationUserId { get; set; }
         public ApplicationUser ApplicationUser { get; set; } // Navigation property for the user who borrowed the book copy
 
         public List<Fine> Fines { get; set; } // Navigation property for the fines associated with this loan 
