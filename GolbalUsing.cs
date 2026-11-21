@@ -1,0 +1,12 @@
+﻿global using Library_Management_System.Models;
+global using Library_Management_System.Models.Data;
+global using Microsoft.AspNetCore.Identity;
+global using Microsoft.EntityFrameworkCore;
+global using Microsoft.AspNetCore.Mvc.Rendering;
+global using System.ComponentModel.DataAnnotations;
+global using Microsoft.AspNetCore.Mvc;
+global using Microsoft.AspNetCore.Mvc.Diagnostics;
+global using Library_Management_System.Models.DTO;
+global using Microsoft.EntityFrameworkCore.Metadata.Builders;
+global using Library_Management_System.Models.DTO.Author;
+global using Library_Management_System.Models.VM.Author;
