@@ -12,8 +12,14 @@ namespace Library_Management_System.Controllers
         }
         public IActionResult Index()
         {
-            var results = _context.Books.ToList();
+            var results = _context.Books.Include(b => b.Category).ToList();
             return results.Count() > 0 ? View(results) : View("Empty");
+        }
+        [HttpGet]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var item = await _context.Books.AsNoTracking().Include(b => b.Category).FirstOrDefaultAsync(b => b.Id == id);
+            return item != null ? View(item) : NotFound();
         }
         [HttpGet]
         public IActionResult Create()

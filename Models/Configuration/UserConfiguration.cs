@@ -13,6 +13,10 @@ namespace Library_Management_System.Models.Configuration
                  .HasColumnType("nvarchar(50)");
             builder.Property(u => u.CreatedA)
                 .IsRequired();
+
+            builder.HasIndex(u => u.PhoneNumber).IsUnique();
+            builder.HasIndex(u => u.Email).IsUnique();
+
             // Configure the relationship with Loan
             builder.HasMany(u => u.Loans)
                 .WithOne(l => l.ApplicationUser)
