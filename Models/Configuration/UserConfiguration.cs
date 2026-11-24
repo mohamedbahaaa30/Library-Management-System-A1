@@ -11,8 +11,13 @@ namespace Library_Management_System.Models.Configuration
                  .IsRequired()
                  .HasMaxLength(50)
                  .HasColumnType("nvarchar(50)");
-            builder.Property(u => u.CreatedA)
+            builder.Property(u => u.CreatedAt)
                 .IsRequired();
+
+            builder.Property(u => u.MembershipNumber)
+                .HasDefaultValueSql("NEXT VALUE FOR MembershipNumbers");   // property must be int
+
+            builder.HasIndex(u => u.MembershipNumber).IsUnique();
 
             builder.HasIndex(u => u.PhoneNumber).IsUnique();
             builder.HasIndex(u => u.Email).IsUnique();

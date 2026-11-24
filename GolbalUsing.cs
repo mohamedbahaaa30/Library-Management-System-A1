@@ -10,3 +10,4 @@ global using Library_Management_System.Models.DTO;
 global using Microsoft.EntityFrameworkCore.Metadata.Builders;
 global using Library_Management_System.Models.DTO.Author;
 global using Library_Management_System.Models.VM.Author;
+global using Library_Management_System.Services.Interfaces;

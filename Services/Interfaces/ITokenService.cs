@@ -1,6 +1,7 @@
 ﻿namespace Library_Management_System.Services.Interfaces
 {
-    public class ITokenService
+    public interface ITokenService
     {
+        Task<string> CreateToken(ApplicationUser user);
     }
 }
