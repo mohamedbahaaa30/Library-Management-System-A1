@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Library_Management_System.Models
+namespace Library_Management_System.Models.Entities
 {
     public class Fine
     {

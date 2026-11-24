@@ -1,4 +1,5 @@
 ﻿using Library_Management_System.Models.DTO.Book;
+using Library_Management_System.Models.Entities;
 using Library_Management_System.Models.VM.Book;
 
 namespace Library_Management_System.Controllers
@@ -22,10 +23,11 @@ namespace Library_Management_System.Controllers
             return item != null ? View(item) : NotFound();
         }
         [HttpGet]
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            // Populate the dropdown lists for authors and categories
-            return View();
+            var model = new CreateBookDto();
+            await FillDropdownsAsync(model);
+            return View(model);
         }
         [HttpPost]
         public async Task<IActionResult> Add(CreateBookDto model)
@@ -117,6 +119,15 @@ namespace Library_Management_System.Controllers
             return RedirectToAction("Index");
         }
 
+        public async Task FillDropdownsAsync(CreateBookDto model)
+        {
+            model.Categories = await _context.Categories
+                .OrderBy(c => c.Name).Select(c => new SelectListItem { Value = c.Id.ToString(), Text = c.Name }).ToListAsync();
+
+            model.Authors = await _context.Authors
+                .OrderBy(a => a.Name).Select(a => new SelectListItem { Value = a.Id.ToString(), Text = a.Name }).ToListAsync();
+
+        }
 
     }
 }

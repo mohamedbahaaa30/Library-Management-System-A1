@@ -1,9 +1,6 @@
+using Library_Management_System.Models.Options;
 
-
-using Library_Management_System.Services.Implemetation;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
+;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,11 +11,13 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<Context>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-
 // Add Identity services
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<Context>()
     .AddDefaultTokenProviders();
+
+//configure library policies 
+builder.Services.Configure<LibraryPolicy>(builder.Configuration.GetSection("LibraryPolicy"));
 
 //add token service 
 builder.Services.AddScoped<ITokenService, TokenService>();
@@ -40,6 +39,8 @@ builder.Services.AddAuthentication(options =>
             Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)),
     };
 });
+//register loan service 
+builder.Services.AddScoped<ILoanService, LoanService>();
 
 var app = builder.Build();
 

@@ -1,4 +1,5 @@
 ﻿using Library_Management_System.Models.DTO.ApplicationUser;
+using Library_Management_System.Models.Entities;
 using Library_Management_System.Services.Implemetation;
 using Microsoft.AspNetCore.Mvc;
 

@@ -1,4 +1,5 @@
 ﻿using Library_Management_System.Models.DTO.Category;
+using Library_Management_System.Models.Entities;
 using Library_Management_System.Models.VM.Category;
 using Microsoft.AspNetCore.Mvc;
 
@@ -27,7 +28,7 @@ namespace Library_Management_System.Controllers
         [HttpGet]
         public IActionResult Create()
         {
-            // Populate the dropdown lists for authors and categories
+        
             return View();
         }
         [HttpPost]

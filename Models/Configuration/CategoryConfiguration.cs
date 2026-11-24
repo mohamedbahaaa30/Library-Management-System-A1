@@ -1,5 +1,7 @@
 ﻿
 
+using Library_Management_System.Models.Entities;
+
 namespace Library_Management_System.Models.Configuration
 {
     public class CategoryConfiguration : IEntityTypeConfiguration<Category>

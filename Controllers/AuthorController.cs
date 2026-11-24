@@ -1,4 +1,5 @@
 ﻿
+using Library_Management_System.Models.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Identity.Client;
 
@@ -6,7 +7,7 @@ namespace Library_Management_System.Controllers
 {
     public class AuthorController : Controller
     {
-        public Context _context;
+        private readonly Context _context;
         public AuthorController(Context context)
         {
             this._context = context;
