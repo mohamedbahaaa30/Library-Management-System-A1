@@ -28,15 +28,23 @@ namespace Library_Management_System.Services.Implemetation
             if (activeLoans >= _libraryPolicy.MaxActiveLoans)
                 return ServiceResult<Loan>.Fail("there is no available copies");
 
-            //validate that this user does not have this book 
-            var alreadyBorrowed =  await _context.Loans.AnyAsync(l => l.ApplicationUserId == userId && l.ReturnDate == null && l.BookId == BookId);
+            //validate that this user does not have a copy book 
+            var copies = await _context.BookCopies.Where(b => b.BookId == BookId).Select(b=>b.Id).ToListAsync();
+            var alreadyBorrowed =  await _context.Loans.AnyAsync(l => l.ApplicationUserId == userId && l.ReturnDate == null && copies.Contains(l.BookCopyId));
             if (alreadyBorrowed)
                 return ServiceResult<Loan>.Fail("this user hase a copy for that book ");
+            var copy = await _context.BookCopies.Where(c => c.BookId == BookId && c.IsAvailable)
+                        .OrderBy(c => c.Id)
+                        .FirstOrDefaultAsync();
+
+            copy.IsAvailable = false;
+            copy.Status = BookCopyStatus.Borrowed;
 
             var newLoan = new Loan
             {
                 ApplicationUserId = userId,
-                BookId = BookId,
+                BookCopyId = copy.Id,
+                CopyCode = copy.CopyCode,
                 LoanDate = DateTime.UtcNow,
                 DueDate = DateTime.UtcNow.AddDays(_libraryPolicy.LoanDurationDays)
             };
@@ -74,7 +82,10 @@ namespace Library_Management_System.Services.Implemetation
                 var fine = daysLate * _libraryPolicy.FinePerDay;
             }
             loanExist.ReturnDate = DateTime.UtcNow;
+
             loanExist.BookCopy.Book.AvailableCopies++;
+            loanExist.BookCopy.IsAvailable = true;
+            loanExist.BookCopy.Status = BookCopyStatus.Available;
             await _context.SaveChangesAsync();
             return ServiceResult<Loan>.Ok(loanExist);
         }
@@ -85,7 +96,7 @@ namespace Library_Management_System.Services.Implemetation
         }
         public async Task<ServiceResult<Loan>> GetActiveAsync(string id)
         {
-            var result = await _context.Loans.Include(l => l.BookCopy).FirstOrDefaultAsync(l => l.ApplicationUserId == id && l.DueDate == null);
+            var result = await _context.Loans.Include(l => l.BookCopy).FirstOrDefaultAsync(l => l.ApplicationUserId == id && l.ReturnDate == null);
             return ServiceResult<Loan>.Ok(result);
         }
     }

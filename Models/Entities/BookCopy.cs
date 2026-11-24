@@ -1,9 +1,15 @@
-﻿namespace Library_Management_System.Models.Entities
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Library_Management_System.Models.Entities
 {
     public class BookCopy
     {
         public int Id { get; set; }
-        public int Barcode { get; set; }
+        public int CopyNumber { get; set; }
+        [NotMapped]
+        public string CopyCode => $"CPY:{CopyNumber}:D6";
+        public bool IsAvailable { get; set; }
         public BookCopyStatus Status { get; set; }
         public int BookId { get; set; }
         public Book Book { get; set; }

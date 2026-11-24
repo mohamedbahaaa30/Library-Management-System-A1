@@ -26,6 +26,10 @@ namespace Library_Management_System.Models.Data
                 .StartsAt(1000)
                 .IncrementsBy(1);
 
+            builder.HasSequence<int>("CopyNumber")
+                .StartsAt(5000)
+                .IncrementsBy(1);
+
             builder.ApplyConfigurationsFromAssembly(typeof(Context).Assembly);   // loads UserConfiguration
         }
 
