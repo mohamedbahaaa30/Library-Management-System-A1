@@ -1,5 +1,4 @@
-﻿using Library_Management_System.Models.DTO.Book;
-using Library_Management_System.Models.Entities;
+﻿using Library_Management_System.Models.Entities;
 using Library_Management_System.Models.VM.Book;
 
 namespace Library_Management_System.Controllers
@@ -25,12 +24,12 @@ namespace Library_Management_System.Controllers
         [HttpGet]
         public async Task<IActionResult> Create()
         {
-            var model = new CreateBookDto();
+            var model = new CreateBookVM();
             await FillDropdownsAsync(model);
             return View(model);
         }
         [HttpPost]
-        public async Task<IActionResult> Add(CreateBookDto model)
+        public async Task<IActionResult> Add(CreateBookVM model)
         {
             if(!ModelState.IsValid)
             {
@@ -43,6 +42,10 @@ namespace Library_Management_System.Controllers
                 ModelState.AddModelError("Title", "A book with this title already exists.");
                 return View(model);
             }
+            //the dto contain list of authors ids -> so bring their objets 
+            var authors = await _context.Authors
+                    .Where(a => model.AuthorIds.Contains(a.Id))
+                    .ToListAsync();
 
             Book book = new Book
             {
@@ -51,7 +54,8 @@ namespace Library_Management_System.Controllers
                 PublishYear = model.PublishYear,
                 AvailableCopies = model.AvailableCopies,
                 ISBN = model.ISBN,
-                CategoryId = model.CategoryId
+                CategoryId = model.CategoryId,
+                Authors = authors
             };
             await _context.Books.AddAsync(book);
             await _context.SaveChangesAsync();
@@ -81,22 +85,29 @@ namespace Library_Management_System.Controllers
             return View(displayBookVM);
         }
         [HttpPut()]
-        public async Task<IActionResult> Update( UpdateBookDto model)
+        public async Task<IActionResult> Update(EditBookVM model)
         {
-            if (!ModelState.IsValid) //validate the data 
+            if (!ModelState.IsValid)
             {
-                return View(model);
+                return View(model);   // use EditBookVM and repopulate the lists (point 3)
             }
-            var existingBook = await _context.Books.FindAsync(model.Id); // check if the book exists in the database 
+
+            var existingBook = await _context.Books
+                .Include(b => b.Authors)
+                .FirstOrDefaultAsync(b => b.Id == model.Id);
             if (existingBook == null)
                 return NotFound();
-            
-            var TitleTaken = await _context.Books.AnyAsync(b => b.Title == model.Title && b.Id != model.Id); // Check if a book with the same title already exists
+
+            var TitleTaken = await _context.Books.AnyAsync(b => b.Title == model.Title && b.Id != model.Id);
             if (TitleTaken)
             {
                 ModelState.AddModelError("Title", "A book with this title already exists.");
                 return View(model);
             }
+
+            var authors = await _context.Authors
+                .Where(a => model.AuthorIds.Contains(a.Id))
+                .ToListAsync();
 
             existingBook.Title = model.Title;
             existingBook.Description = model.Description;
@@ -104,7 +115,10 @@ namespace Library_Management_System.Controllers
             existingBook.AvailableCopies = model.AvailableCopies;
             existingBook.ISBN = model.ISBN;
             existingBook.CategoryId = model.CategoryId;
+            existingBook.Authors = authors;
+
             await _context.SaveChangesAsync();
+
             return RedirectToAction("Index");
         }
         public IActionResult Delete(int id)
@@ -119,7 +133,7 @@ namespace Library_Management_System.Controllers
             return RedirectToAction("Index");
         }
 
-        public async Task FillDropdownsAsync(CreateBookDto model)
+        public async Task FillDropdownsAsync(CreateBookVM model)
         {
             model.Categories = await _context.Categories
                 .OrderBy(c => c.Name).Select(c => new SelectListItem { Value = c.Id.ToString(), Text = c.Name }).ToListAsync();

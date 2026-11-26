@@ -1,9 +1,4 @@
-﻿
-using Library_Management_System.Models.Entities;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Identity.Client;
-
-namespace Library_Management_System.Controllers
+﻿namespace Library_Management_System.Controllers
 {
     public class AuthorController : Controller
     {
@@ -13,11 +8,10 @@ namespace Library_Management_System.Controllers
             this._context = context;
         }
         [HttpGet]
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            var results = _context.Authors.ToList();
-
-            return results.Count() > 0 ? View(results) : View("Empty");
+            var authors = await _context.Authors.AsNoTracking().ToListAsync();
+            return authors.Any() ? View(authors) : View("Empty");
         }
         [HttpGet]
         public async Task<IActionResult> GetById(int id)
@@ -31,12 +25,12 @@ namespace Library_Management_System.Controllers
             return View();
         }
         [HttpPost]
-        public async Task<IActionResult> Add(CreateAuthorDto model)
+        public async Task<IActionResult> Add(CreateAuthorVM model)
         {
             if (!ModelState.IsValid)
                 return View(model);
-            var exist = await _context.Authors.AnyAsync(A => A.Name == model.Name);
-            if (exist)
+
+            if (await _context.Authors.AnyAsync(A => A.Name == model.Name))
             {
                 ModelState.AddModelError("name","author with this name is already exist");
                 return View(model);
@@ -48,12 +42,12 @@ namespace Library_Management_System.Controllers
             };
             await _context.Authors.AddAsync(author);
             await _context.SaveChangesAsync();
-            return RedirectToAction("Index");
+            return RedirectToAction(nameof(Index));
         }
         [HttpGet]
-        public IActionResult Edit(int id)
+        public async Task<IActionResult> Edit(int id)
         {
-            var author = _context.Authors.FirstOrDefault(a => a.Id == id);
+            var author = await _context.Authors.FirstOrDefaultAsync(a => a.Id == id);
             if (author == null)
             {
                 return NotFound();
@@ -64,19 +58,19 @@ namespace Library_Management_System.Controllers
                 Name = author.Name,
                 Bio = author.Bio
             };
-            return View(editAuthorVM);
+            return View( new EditAuthorVM {Id = author.Id , Name = author.Name , Bio = author.Bio});
         }
-        [HttpPut]
-        public async Task<IActionResult> Update(EditAuthorDto model)
+        [HttpPost]
+        public async Task<IActionResult> Update(EditAuthorVM model)
         {
             if (!ModelState.IsValid)
                 return View(model);
 
             var exist = await _context.Authors.FindAsync(model.Id);
-            if(exist == null)
-            {
-                return NotFound();
-            }
+            if(exist == null) return NotFound();
+            
+
+            var name = model.Name.Trim();
             var takenName = await _context.Authors.AnyAsync(A => A.Name == model.Name && A.Id != model.Id);
             if (takenName)
             {
@@ -87,9 +81,9 @@ namespace Library_Management_System.Controllers
             exist.Bio = model.Bio;
 
             await _context.SaveChangesAsync();
-            return RedirectToAction("GetById" , new { id = exist.Id });
+            return RedirectToAction(nameof(GetById) , new { id = exist.Id });
         }
-        [HttpDelete]
+        [HttpPost]
         public async Task<IActionResult> Delete(int Id)
         {
             var item = await _context.Authors.FindAsync(Id);
@@ -97,10 +91,7 @@ namespace Library_Management_System.Controllers
                 return NotFound();
              _context.Authors.Remove(item);
             await _context.SaveChangesAsync();
-            return RedirectToAction("index");
+            return RedirectToAction(nameof(Index));
         }
-
-
-
     }
 }

@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
 namespace Library_Management_System.Controllers
 {
+    [Authorize(Roles = "Member")]
     public class LoanController : Controller
     {
         private readonly ILoanService _loanService ;

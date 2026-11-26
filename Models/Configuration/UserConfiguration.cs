@@ -1,17 +1,12 @@
-﻿using Library_Management_System.Models.Entities;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
-
-namespace Library_Management_System.Models.Configuration
+﻿namespace Library_Management_System.Models.Configuration
 {
     public class UserConfiguration : IEntityTypeConfiguration<ApplicationUser>
     {
         public void Configure(EntityTypeBuilder<ApplicationUser> builder)
         {
             builder.Property(u => u.MembershipNumber)
-                 .IsRequired()
-                 .HasMaxLength(50)
-                 .HasColumnType("nvarchar(50)");
+                 .IsRequired();
+
             builder.Property(u => u.CreatedAt)
                 .IsRequired();
 

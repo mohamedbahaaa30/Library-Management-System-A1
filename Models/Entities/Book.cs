@@ -7,7 +7,7 @@
         public string Description { get; set; }
         public int PublishYear { get; set; }
         public int AvailableCopies { get; set; }
-        public int? ISBN { get; set; } // International Standard Book Number = barcode  // old books before 1970 may not have ISBN 
+        public string? ISBN { get; set; } // International Standard Book Number = barcode  // old books before 1970 may not have ISBN 
         public bool? IsDeleted { get; set; } //soft delete flag
 
         // Navigation properties

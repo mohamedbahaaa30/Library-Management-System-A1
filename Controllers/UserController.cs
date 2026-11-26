@@ -1,36 +1,21 @@
-﻿using Library_Management_System.Models.DTO.ApplicationUser;
-using Library_Management_System.Models.Entities;
-using Library_Management_System.Services.Implemetation;
-using Microsoft.AspNetCore.Mvc;
-
-namespace Library_Management_System.Controllers
+﻿namespace Library_Management_System.Controllers
 {
     public class UserController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly ITokenService _tokenService;
-        public UserController(UserManager<ApplicationUser> userManager , SignInManager<ApplicationUser> signInManager  , ITokenService tokenService)
+        public UserController(UserManager<ApplicationUser> userManager , SignInManager<ApplicationUser> signInManager )
         {
             this._userManager = userManager;
             this._signInManager = signInManager;
-            this._tokenService = tokenService;
         }
-        public IActionResult Index()
-        {
-            return View();
-        }
-
+        [HttpGet]
         public IActionResult SignUp()
         {
             return View();
         }
-        public IActionResult SignIn()
-        {
-            return View();
-        }
-
-        public async Task<IActionResult> Register(CreateUserDto model)
+        [HttpPost]
+        public async Task<IActionResult> SignUp(CreateUserDto model)
         {
             if (!ModelState.IsValid)
                 return View(model);
@@ -49,9 +34,11 @@ namespace Library_Management_System.Controllers
             //map
             var newUser = new ApplicationUser
             {
-                UserName = model.Name,
-                PhoneNumber = model.Phone,
+                //username must be unique
+                UserName = model.Email,
                 Email = model.Email,
+                FullName = model.Name,
+                PhoneNumber = model.Phone,
                 IsDeleted = false,
                 CreatedAt = DateTime.UtcNow
             };
@@ -66,23 +53,33 @@ namespace Library_Management_System.Controllers
             await _userManager.AddToRoleAsync(newUser, "Member");   // optional; the role must already exist
             return RedirectToAction("Index");
         }
-        public async Task<IActionResult> Login(LoginDto model)
+        [HttpGet]
+        public IActionResult SignIn()
+        {
+            return View();
+        }
+        [HttpPost]
+        public async Task<IActionResult> SignIn(LoginDto model)
         {
             if (!ModelState.IsValid)
-                return View("login",model);
+                return View("SignIn", model);
 
             //check for the email 
             var user = await _userManager.FindByEmailAsync(model.Email);
-            if(user == null)
+            if (user == null)
             {
                 ModelState.AddModelError(string.Empty, "there is no accout for this Email");
-                return View(model);
+                return View("SignIn", model);
             }
-            var result = await _signInManager.PasswordSignInAsync( user, model.Password, true, lockoutOnFailure: true);
 
-            //token 
-            var token = await _tokenService.CreateToken(user);
-            return Ok(new { token });
+            var result = await _signInManager.PasswordSignInAsync( user, model.Password, true, lockoutOnFailure: true);
+            if (!result.Succeeded)
+            {
+                ModelState.AddModelError(string.Empty, "you entered worng information");
+                return View("SignIn", model);
+            }
+
+            return RedirectToAction("Index", "Home");
         }
     }
 }

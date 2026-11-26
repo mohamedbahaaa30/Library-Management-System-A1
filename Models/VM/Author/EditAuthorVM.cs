@@ -3,7 +3,13 @@
     public class EditAuthorVM
     {
         public int Id { get; set; }
+
+        [Required(ErrorMessage = "Name is required")]
+        [MaxLength(50)]
         public string Name { get; set; }
+
+        [Required(ErrorMessage = "Bio is required")]
+        [MaxLength(1000)]
         public string Bio { get; set; }
     }
 }
