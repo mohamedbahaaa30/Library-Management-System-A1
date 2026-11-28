@@ -1,0 +1,42 @@
+﻿@model IEnumerable<DisplayBookVM>
+@{
+    ViewData["Title"] = "Books";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Books</h2>
+    @if (User.IsInRole("Admin"))
+    {
+        <a class="btn btn-primary" asp-action="Create">+ New book</a>
+    }
+</div>
+
+<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+    @foreach (var b in Model)
+    {
+        <div class="col">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">@b.Title</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">@string.Join(", ", b.AuthorNames)</h6>
+                    <p class="mb-2">
+                        <span class="badge bg-info text-dark">@b.CategoryName</span>
+                        <span class="badge bg-light text-dark border">@b.PublishYear</span>
+                    </p>
+                    <p class="card-text text-truncate-3">@b.Description</p>
+                    <div class="mt-auto d-flex justify-content-between align-items-center">
+                        @if (b.AvailableCopies > 0)
+                        {
+                            <span class="badge bg-success">@b.AvailableCopies available</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">Unavailable</span>
+                        }
+                        <a class="btn btn-sm btn-outline-primary" asp-action="GetById" asp-route-id="@b.Id">Details</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>

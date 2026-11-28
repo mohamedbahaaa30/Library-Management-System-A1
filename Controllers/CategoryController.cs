@@ -1,8 +1,4 @@
-﻿using Library_Management_System.Models.DTO.Category;
-using Library_Management_System.Models.Entities;
-using Library_Management_System.Models.VM.Category;
-using Microsoft.AspNetCore.Mvc;
-
+﻿using Library_Management_System.Models.VM.Category;
 namespace Library_Management_System.Controllers
 {
     public class CategoryController : Controller
@@ -13,36 +9,31 @@ namespace Library_Management_System.Controllers
             _context = context;
         }
         [HttpGet]
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            var results = _context.Categories.ToList();
-            return results.Count() > 0 ? View(results) : View("Empty");
+            var categories = await CategoriesAsDisplay().ToListAsync();
+            return categories.Any() ? View(categories) : View("Empty");
         }
 
         [HttpGet]
         public async Task<IActionResult> GetById(int id)
         {
-            var result = await _context.Categories.AsNoTracking().Include(c => c.Books).FirstOrDefaultAsync(c => c.Id == id);
-            return result != null ? View(result) : NotFound();
+            var category = await CategoriesAsDisplay().FirstOrDefaultAsync(c => c.Id == id);
+            return category == null ? NotFound() : View(category);
         }
         [HttpGet]
-        public IActionResult Create()
-        {
+        public IActionResult Create() => View();
         
-            return View();
-        }
         [HttpPost]
-        public async Task<IActionResult> Add(CreateCategoryDto model)
+        public async Task<IActionResult> Add(CreateCategoryVM model)
         {
-            if (!ModelState.IsValid)
-            {
-                return View(model);
-            }
+            if (!ModelState.IsValid)  return View(nameof(Create),model);
+            
             var Exist = _context.Categories.FirstOrDefault(c => c.Name == model.Name);
             if (Exist != null)
             {
                 ModelState.AddModelError("Name", "A category with this name already exists.");
-                return View(model);
+                return View(nameof(Create), model);
             }
             Category category = new Category
             {
@@ -51,16 +42,14 @@ namespace Library_Management_System.Controllers
             };
             await _context.Categories.AddAsync(category);
             await _context.SaveChangesAsync();
-            return RedirectToAction("Index");
+            return RedirectToAction(nameof(Index));
         }
         [HttpGet]
         public IActionResult Edit(int id)
         {
             var category = _context.Categories.FirstOrDefault(c => c.Id == id);
-            if (category == null)
-            {
-                return NotFound();
-            }
+            if (category == null) return NotFound();
+
             EditCategoryVM editCategoryVM = new EditCategoryVM
             {
                 Id = category.Id,
@@ -69,41 +58,49 @@ namespace Library_Management_System.Controllers
             };
             return View(editCategoryVM);
         }
-        [HttpPut]
-        public async Task<IActionResult> Update(UpdateCategoryDto model)
+        [HttpPost]
+        public async Task<IActionResult> Update(EditCategoryVM model)
         {
-            if (!ModelState.IsValid)
-            {
-                return View(model);
-            }
-
+            if (!ModelState.IsValid) return View(nameof(Edit),model);
+            
             var Exist = await _context.Categories.FindAsync(model.Id);
-            if (Exist == null)
-                return NotFound();
+            if (Exist == null) return NotFound();
+
             var takenName = await _context.Categories.AnyAsync(c => c.Name == model.Name && c.Id != model.Id );
             if (takenName)
             {
                 ModelState.AddModelError("Name", "A category with this name already exists.");
-                return View(model);
+                return View(nameof(Edit), model);
             }
             Exist.Name = model.Name;
             Exist.Description = model.Description;
             await _context.SaveChangesAsync();
-            return RedirectToAction("Index");
+            return RedirectToAction(nameof(GetById), new {id =Exist.Id});
         }
-
-        [HttpDelete]
+        [HttpPost]
         public IActionResult Delete(int id)
         {
             var category = _context.Categories.FirstOrDefault(c => c.Id == id);
-            if (category == null)
-            {
-                return NotFound();
-            }
+            if (category == null) return NotFound();
+            
             _context.Categories.Remove(category);
             _context.SaveChanges();
-            return RedirectToAction("Index");
+            return RedirectToAction(nameof(Index));
         }
 
+
+        //display as vm
+        private IQueryable<DisplayCategoryVM> CategoriesAsDisplay()
+        {
+            var categories = _context.Categories.AsNoTracking()
+               .Select(c => new DisplayCategoryVM
+               {
+                   Id = c.Id,
+                   Name = c.Name,
+                   Description = c.Description,
+                   BookCount = c.Books.Count
+               });
+            return categories;
+        }    
     }
 }

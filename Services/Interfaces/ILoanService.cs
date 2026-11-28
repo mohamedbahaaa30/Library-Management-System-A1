@@ -1,13 +1,14 @@
-﻿using Library_Management_System.Services.Common;
+﻿using Library_Management_System.Models.VM.Loan;
+using Library_Management_System.Services.Common;
 
 namespace Library_Management_System.Services.Interfaces
 {
     public interface ILoanService 
     {
-        Task<ServiceResult<Loan>> BorrowAsync(string userId, int CopyId);
-        Task<ServiceResult<Loan>> ReturnAsync(int loanId);
-        Task<ServiceResult<Loan>> RenewAsync(int loanId);
-        Task<ServiceResult<Loan>> GetAllAsync(string userId);
-        Task<ServiceResult<Loan>> GetActiveAsync(string userId);
+        Task<ServiceResult<LoanViewModel>> BorrowAsync(string userId, int CopyId);
+        Task<ServiceResult<LoanViewModel>> ReturnAsync(int loanId);
+        Task<ServiceResult<LoanViewModel>> RenewAsync(int loanId);
+        Task<ServiceResult<List<LoanViewModel>>> GetAllAsync(string userId);
+        Task<ServiceResult<List<LoanViewModel>>> GetActiveAsync(string userId);
     }
 }

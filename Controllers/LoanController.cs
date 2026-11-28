@@ -4,7 +4,6 @@ using System.Security.Claims;
 
 namespace Library_Management_System.Controllers
 {
-    [Authorize(Roles = "Member")]
     public class LoanController : Controller
     {
         private readonly ILoanService _loanService ;
@@ -16,21 +15,31 @@ namespace Library_Management_System.Controllers
         private string CurrentUserId =>
             User.FindFirstValue(ClaimTypes.NameIdentifier)!
             ?? throw new UnauthorizedAccessException ();
-
         public async Task<IActionResult> GetLAll()
-            => View(_loanService.GetAllAsync(CurrentUserId));
-
+            => View(await _loanService.GetAllAsync(CurrentUserId));
         public async Task<IActionResult> GetActive()
-            => View(_loanService.GetActiveAsync(CurrentUserId));
-
+            => View(await _loanService.GetActiveAsync(CurrentUserId));
         public async Task<IActionResult> Borrow(int bookId)
-            => View(_loanService.BorrowAsync(CurrentUserId, bookId));
-
-        public async Task<IActionResult> Renew(int id)
-            => View(_loanService.RenewAsync(id));
-
-        public async Task<IActionResult> Return(int id)
-            => View(_loanService.ReturnAsync(id));
+        {
+            var result = await _loanService.BorrowAsync(CurrentUserId, bookId);
+            if (result.Success) TempData["Success"] = "Book borrowed.";
+            else TempData["Error"] = result.Error;
+            return RedirectToAction(nameof(GetActive));
+        }
+        public async Task<IActionResult> Renew(int loanId)
+        {
+            var result = await _loanService.RenewAsync(loanId);
+            if (result.Success) TempData["Success"] = "Loan renewed.";
+            else TempData["Error"] = result.Error;
+            return RedirectToAction(nameof(GetActive));
+        }
+        public async Task<IActionResult> Return(int loanId)
+        {
+            var result = await _loanService.ReturnAsync(loanId);
+            if (result.Success) TempData["Success"] = "Book returned.";
+            else TempData["Error"] = result.Error;
+            return RedirectToAction(nameof(GetActive));
+        }
 
         public IActionResult Index()
         {

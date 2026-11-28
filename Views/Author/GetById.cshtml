@@ -1,0 +1,36 @@
+﻿@model DisplayAuthorVM
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <h2 class="card-title">@Model.Name</h2>
+        <p class="card-text">@Model.Bio</p>
+        <h5 class="mt-4">Books (@Model.BookCount)</h5>
+        @if (Model.BookTitles.Any())
+        {
+            <ul>
+                @foreach (var t in Model.BookTitles)
+                {
+                    <li>@t</li>
+                }
+            </ul>
+        }
+        else
+        {
+            <p class="text-muted">No books for this author yet.</p>
+        }
+    </div>
+    <div class="card-footer">
+        <a class="btn btn-outline-secondary" asp-action="Index">← Back</a>
+        @if (User.IsInRole("Admin"))
+        {
+            <a class="btn btn-outline-primary" asp-action="Edit" asp-route-id="@Model.Id">Edit</a>
+        }
+    </div>
+</div>@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}

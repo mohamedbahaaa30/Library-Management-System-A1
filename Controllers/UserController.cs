@@ -1,4 +1,6 @@
-﻿namespace Library_Management_System.Controllers
+﻿using Library_Management_System.Models.VM.ApplicationUser;
+
+namespace Library_Management_System.Controllers
 {
     public class UserController : Controller
     {
@@ -10,12 +12,9 @@
             this._signInManager = signInManager;
         }
         [HttpGet]
-        public IActionResult SignUp()
-        {
-            return View();
-        }
+        public IActionResult SignUp() => View(); 
         [HttpPost]
-        public async Task<IActionResult> SignUp(CreateUserDto model)
+        public async Task<IActionResult> SignUp(RegisterVM model)
         {
             if (!ModelState.IsValid)
                 return View(model);
@@ -35,10 +34,10 @@
             var newUser = new ApplicationUser
             {
                 //username must be unique
-                UserName = model.Email,
-                Email = model.Email,
+                UserName = email,
+                Email = email,
                 FullName = model.Name,
-                PhoneNumber = model.Phone,
+                PhoneNumber = phone,
                 IsDeleted = false,
                 CreatedAt = DateTime.UtcNow
             };
@@ -51,7 +50,7 @@
                 return View(model);
             }
             await _userManager.AddToRoleAsync(newUser, "Member");   // optional; the role must already exist
-            return RedirectToAction("Index");
+            return RedirectToAction(nameof(SignUp));
         }
         [HttpGet]
         public IActionResult SignIn()
@@ -59,7 +58,7 @@
             return View();
         }
         [HttpPost]
-        public async Task<IActionResult> SignIn(LoginDto model)
+        public async Task<IActionResult> SignIn(LoginVM model)
         {
             if (!ModelState.IsValid)
                 return View("SignIn", model);
@@ -68,18 +67,24 @@
             var user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null)
             {
-                ModelState.AddModelError(string.Empty, "there is no accout for this Email");
-                return View("SignIn", model);
+                ModelState.AddModelError(string.Empty, "Invalid email or password.");   
+                return View(nameof(SignIn), model);
             }
 
             var result = await _signInManager.PasswordSignInAsync( user, model.Password, true, lockoutOnFailure: true);
             if (!result.Succeeded)
             {
                 ModelState.AddModelError(string.Empty, "you entered worng information");
-                return View("SignIn", model);
+                return View(nameof(SignIn), model);
             }
-
             return RedirectToAction("Index", "Home");
+        }
+        [HttpPost]                                                  
+        [ValidateAntiForgeryToken]                                  
+        public async Task<IActionResult> Logout()                   
+        {                                                           
+            await _signInManager.SignOutAsync();                    
+            return RedirectToAction("SignIn");                      
         }
     }
 }

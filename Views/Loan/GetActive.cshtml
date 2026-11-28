@@ -1,0 +1,62 @@
+﻿@model ServiceResult<List<LoanViewModel>>
+@{
+    ViewData["Title"] = "My active loans";
+    var loans = Model.Data ?? new List<LoanViewModel>();
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">My active loans</h2>
+    <a class="btn btn-outline-secondary" asp-action="GetLAll">Loan history</a>
+</div>
+
+@if (!Model.Success)
+{
+    <div class="alert alert-danger">@Model.Error</div>
+}
+else if (!loans.Any())
+{
+    <div class="text-center py-5">
+        <h4>You have no active loans</h4>
+        <a class="btn btn-primary" asp-controller="Book" asp-action="Index">Browse books</a>
+    </div>
+}
+else
+{
+    <table class="table table-hover align-middle">
+        <thead class="table-light">
+            <tr><th>Book</th><th>Copy</th><th>Borrowed</th><th>Due</th><th>Status</th><th class="text-end">Actions</th></tr>
+        </thead>
+        <tbody>
+            @foreach (var l in loans)
+            {
+                var overdue = l.DueDate < DateTime.UtcNow;
+                <tr class="@(overdue ? "table-danger" : "")">
+                    <td>@l.BookTitle</td>
+                    <td><code>@l.CopyCode</code></td>
+                    <td>@l.LoanDate.ToString("dd MMM yyyy")</td>
+                    <td>@l.DueDate.ToString("dd MMM yyyy")</td>
+                    <td>
+                        @if (overdue)
+                        {
+                            <span class="badge bg-danger">Overdue</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success">On time</span>
+                        }
+                    </td>
+                    <td class="text-end">
+                        <form asp-action="Renew" method="post" class="d-inline">
+                            <input type="hidden" name="loanId" value="@l.LoanId" />
+                            <button type="submit" class="btn btn-sm btn-outline-primary" disabled="@overdue">Renew</button>
+                        </form>
+                        <form asp-action="Return" method="post" class="d-inline">
+                            <input type="hidden" name="loanId" value="@l.LoanId" />
+                            <button type="submit" class="btn btn-sm btn-outline-success">Return</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

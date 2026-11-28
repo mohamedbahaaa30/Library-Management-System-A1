@@ -1,0 +1,19 @@
+﻿@model DisplayCategoryVM
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <h2 class="card-title">@Model.Name</h2>
+        <p class="card-text">@Model.Description</p>
+        <p class="mb-0"><strong>Books in this category:</strong> @Model.BookCount</p>
+    </div>
+    <div class="card-footer">
+        <a class="btn btn-outline-secondary" asp-action="Index">← Back</a>
+        @if (User.IsInRole("Admin"))
+        {
+            <a class="btn btn-outline-primary" asp-action="Edit" asp-route-id="@Model.Id">Edit</a>
+        }
+    </div>
+</div>

@@ -1,7 +1,4 @@
 using Library_Management_System.Models.Options;
-
-;
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -18,6 +15,25 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
 
 //configure library policies 
 builder.Services.Configure<LibraryPolicy>(builder.Configuration.GetSection("LibraryPolicy"));
+
+
+builder.Services.ConfigureApplicationCookie(o =>
+{
+    // where to send people
+    o.LoginPath = "/User/SignIn";
+    o.LogoutPath = "/User/Logout";
+    o.AccessDeniedPath = "/User/AccessDenied";
+
+    // cookie identity and security
+    o.Cookie.Name = "LibraryAuth";
+    o.Cookie.HttpOnly = true;                                   // JavaScript cannot read the cookie
+    o.Cookie.SecurePolicy = CookieSecurePolicy.Always;          // only sent over HTTPS
+    o.Cookie.SameSite = SameSiteMode.Lax;                       // basic protection against cross-site requests
+
+    // lifetime
+    o.ExpireTimeSpan = TimeSpan.FromDays(7);                    // how long a persistent login lasts
+    o.SlidingExpiration = true;                                 // each visit renews the timer
+});
 
 //register loan service 
 builder.Services.AddScoped<ILoanService, LoanService>();
@@ -36,7 +52,6 @@ using (var scope = app.Services.CreateScope())
             await roleManager.CreateAsync(new IdentityRole(role));
     }
 }
-
 
 app.UseHttpsRedirection();
 app.UseRouting();

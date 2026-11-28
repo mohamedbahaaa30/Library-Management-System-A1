@@ -1,0 +1,11 @@
+﻿@{
+    ViewData["Title"] = "Books";
+}
+<div class="text-center py-5">
+    <h3>No books yet</h3>
+    <p class="text-muted">The catalog is empty.</p>
+    @if (User.IsInRole("Admin"))
+    {
+        <a class="btn btn-primary" asp-action="Create">Add the first book</a>
+    }
+</div>

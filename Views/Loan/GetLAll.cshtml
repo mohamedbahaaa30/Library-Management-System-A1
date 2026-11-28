@@ -1,0 +1,60 @@
+﻿@model ServiceResult<List<LoanViewModel>>
+@{
+    ViewData["Title"] = "Loan history";
+    var loans = Model.Data ?? new List<LoanViewModel>();
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Loan history</h2>
+    <a class="btn btn-outline-secondary" asp-action="GetActive">Active loans</a>
+</div>
+
+@if (!Model.Success)
+{
+    <div class="alert alert-danger">@Model.Error</div>
+}
+else if (!loans.Any())
+{
+    <div class="text-center py-5"><h4>No loans yet</h4></div>
+}
+else
+{
+    <table class="table table-hover align-middle">
+        <thead class="table-light">
+            <tr><th>Book</th><th>Copy</th><th>Borrowed</th><th>Due</th><th>Returned</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+            @foreach (var l in loans)
+            {
+                <tr>
+                    <td>@l.BookTitle</td>
+                    <td><code>@l.CopyCode</code></td>
+                    <td>@l.LoanDate.ToString("dd MMM yyyy")</td>
+                    <td>@l.DueDate.ToString("dd MMM yyyy")</td>
+                    <td>@(l.ReturnDate?.ToString("dd MMM yyyy") ?? "—")</td>
+                    <td>
+                        @if (l.ReturnDate == null)
+                        {
+                            if (l.DueDate < DateTime.UtcNow)
+                            {
+                                <span class="badge bg-danger">Overdue</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-primary">Active</span>
+                            }
+                        }
+                        else if (l.ReturnDate > l.DueDate)
+                        {
+                            <span class="badge bg-warning text-dark">Returned late</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success">Returned</span>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

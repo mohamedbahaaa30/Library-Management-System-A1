@@ -15,7 +15,6 @@ global using Microsoft.Identity.Client;
 global using System.Net;
 global using Library_Management_System.Models.Entities;
 global using Library_Management_System.Services.Implemetation;
-global using Microsoft.AspNetCore.Authentication.JwtBearer;
 global using Microsoft.IdentityModel.Tokens;
 global using System.Text;
 global using Library_Management_System.Models.Entities;

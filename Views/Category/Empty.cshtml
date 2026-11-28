@@ -1,0 +1,10 @@
+﻿{
+    ViewData["Title"] = "Categories";
+}
+<div class="text-center py-5">
+    <h3>No categories yet</h3>
+    @if (User.IsInRole("Admin"))
+    {
+        <a class="btn btn-primary" asp-action="Create">Add the first category</a>
+    }
+</div>
